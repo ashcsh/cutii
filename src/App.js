@@ -125,7 +125,7 @@ function App() {
       {exchangeRate && exchangeRate !== 0 && (
         <p
           style={{
-            fontSize: 10,
+            fontSize: "1.2rem",
             backgroundColor: "green",
             color: "white",
             marginTop: "10px",
