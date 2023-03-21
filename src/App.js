@@ -35,6 +35,8 @@ function App() {
       setCostModificat(calcul - Math.abs(procent / 100) * calcul);
     } else if (procent > 0) {
       setCostModificat(calcul * (procent / 100) + calcul);
+    } else if( procent === 0) {
+      setCostModificat(calcul)
     }
   },[procent, calcul])
   const handleClick = () => {
