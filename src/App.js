@@ -1,24 +1,30 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ControlledRadioButtonsGroup from "./componenets/Select";
 
 function App() {
-  const [calcul, setCalcul] = useState(null);
+  const [curat, setCurat] = useState(null);
+  const [final, setFinal] = useState(null);
   const [lungime, setLungime] = useState(null);
   const [latime, setLatime] = useState(null);
   const [inaltime, setInaltime] = useState(null);
-  const [pretCarton, setPretCarton] = useState(null);
   const [bucati, setBucati] = useState(null);
   const [procent, setProcent] = useState(null);
+  const [tipCO, setTipCO] = useState(0.57);
 
   const [costModificat, setCostModificat] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setCalcul(
-      (((lungime + latime + 6) * (latime + inaltime + 4) * 2) / 10000) *
-        pretCarton *
-        bucati
-    );
+    const calcul =
+      (((lungime / 10 + latime / 10 + 6) *
+        (latime / 10 + inaltime / 10 + 4) *
+        2) /
+        10000) *
+      tipCO *
+      bucati;
+    setCurat(calcul);
+    setFinal(calcul * 2.58 + 0.19);
   };
   const [exchangeRate, setExchangeRate] = useState(null);
 
@@ -32,22 +38,38 @@ function App() {
 
   useEffect(() => {
     if (procent < 0) {
-      setCostModificat(calcul - Math.abs(procent / 100) * calcul);
+      setCostModificat(final - Math.abs(procent / 100) * final);
     } else if (procent > 0) {
-      setCostModificat(calcul * (procent / 100) + calcul);
-    } else if( procent === 0) {
-      setCostModificat(calcul)
+      setCostModificat(final * (procent / 100) + final);
+    } else if (procent == 0) {
+      setCostModificat(final);
     }
-  },[procent, calcul])
-  const handleClick = () => {
-
-  };
+  }, [procent, final]);
 
   const handleReset = () => {
     window.location.reload();
   };
+
   return (
     <div className="App">
+
+        {exchangeRate && exchangeRate !== 0 && (
+          <p
+            style={{
+              alignSelf: "center",
+              padding: 2,
+              borderRadius: 3,
+              fontSize: "1.2rem",
+              color: "green",
+              marginTop: "10px",
+              marginBottom:"50px"
+            }}
+          >
+            EUR/RON - {exchangeRate.toFixed(2)}
+          </p>
+        )}
+
+      <ControlledRadioButtonsGroup tipCO={tipCO} setTipCO={setTipCO} />
       <form
         className="form"
         onSubmit={(e) => {
@@ -58,7 +80,7 @@ function App() {
           required
           step="0.01"
           type="number"
-          placeholder="Lungime(cm)"
+          placeholder="Lungime(mm)"
           onChange={(e) => {
             setLungime(Number(e.target.value));
           }}
@@ -67,7 +89,7 @@ function App() {
           required
           step="0.01"
           type="number"
-          placeholder="Latime(cm)"
+          placeholder="Latime(mm)"
           onChange={(e) => {
             setLatime(Number(e.target.value));
           }}
@@ -76,12 +98,12 @@ function App() {
           required
           step="0.01"
           type="number"
-          placeholder="Inaltime(cm)"
+          placeholder="Inaltime(mm)"
           onChange={(e) => {
             setInaltime(Number(e.target.value));
           }}
         />
-        <input
+        {/* <input
           required
           step="0.01"
           type="number"
@@ -89,7 +111,7 @@ function App() {
           onChange={(e) => {
             setPretCarton(Number(e.target.value));
           }}
-        />
+        /> */}
         <input
           required
           type="number"
@@ -100,12 +122,29 @@ function App() {
         />
         <button>Calculeaza</button>
       </form>
-      {calcul && calcul !== 0 && (
+      {curat && curat !== 0 && (
         <div className="rezultat">
-          <p> Cost : {calcul.toFixed(2)}</p>
-          <p>Cost in Euro: {(calcul / exchangeRate).toFixed(2)}</p>
+          <p>
+            {" "}
+            Cost Curat : {curat.toFixed(2)}€{" "}
+            <span style={{ fontSize: "1rem" }}>
+              ({(exchangeRate * curat).toFixed(2)}RON)
+            </span>{" "}
+          </p>
+          <p>
+            {" "}
+            Cost Final : {final.toFixed(2)}€{" "}
+            <span style={{ fontSize: "1rem" }}>
+              ({(exchangeRate * final).toFixed(2)}RON){" "}
+            </span>
+          </p>
           <input
-          style={{width:"20%", justifySelf:"center", alignSelf:"center", textAlign:"center"}}
+            style={{
+              width: "20%",
+              justifySelf: "center",
+              alignSelf: "center",
+              textAlign: "center",
+            }}
             type="number"
             placeholder="-/+ %"
             onChange={(e) => {
@@ -114,9 +153,11 @@ function App() {
           />
           {costModificat && (
             <>
-              <p>Noul Cost: {costModificat.toFixed(2)}</p>
               <p>
-                Noul Cost in Euro: {(costModificat / exchangeRate).toFixed(2)}
+                Noul Cost: {costModificat.toFixed(2)}€{" "}
+                <span style={{ fontSize: "1rem" }}>
+                  ({(costModificat * exchangeRate).toFixed(2)} RON)
+                </span>
               </p>
             </>
           )}
@@ -124,20 +165,10 @@ function App() {
       )}
 
       {/* <input type="text" placeholder="Lungime"/> */}
-      {exchangeRate && exchangeRate !== 0 && (
-        <p
-          style={{
-            fontSize: "1.2rem",
-            backgroundColor: "green",
-            color: "white",
-            marginTop: "10px",
-          }}
-        >
-          {" "}
-          EURO/RON {exchangeRate.toFixed(2)}
-        </p>
-      )}
-      <button style={{marginTop:"20px"}} onClick={handleReset}>reset</button>
+
+      <button style={{ marginTop: "20px" }} onClick={handleReset}>
+        reset
+      </button>
     </div>
   );
 }
